@@ -1,0 +1,16 @@
+/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/App/AppState.swift
+/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/App/VideoTranscribeApp.swift
+/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Models/AppSettings.swift
+/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Models/TranscriptionJob.swift
+/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Models/TranscriptionSegment.swift
+/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Models/WhisperModel.swift
+/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Services/ExportService.swift
+/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Services/FFmpegService.swift
+/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Services/ModelDownloader.swift
+/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Services/WhisperService.swift
+/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/DropZoneView.swift
+/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/MainView.swift
+/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/SettingsView.swift
+/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/SetupGuideView.swift
+/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/SidebarView.swift
+/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/TranscriptDetailView.swift

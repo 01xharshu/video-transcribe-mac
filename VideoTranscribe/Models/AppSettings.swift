@@ -1,0 +1,212 @@
+import Foundation
+
+struct AppSettings: Codable {
+    var selectedModel: WhisperModel = .largev3turbo
+    var whisperPath: String = "/opt/homebrew/bin/whisper-cli"
+    var modelsDirectory: String = ""
+    var outputDirectory: URL? = nil
+    var enableTimestamps: Bool = true
+    var language: TranscriptionLanguage = .auto
+    var autoCleanup: Bool = true
+    var enableLightFormatting: Bool = false
+    var threads: Int = 0 // 0 = auto
+    
+    private static let settingsKey = "VideoTranscribeSettings"
+    
+    static func load() -> AppSettings {
+        guard let data = UserDefaults.standard.data(forKey: settingsKey),
+              let settings = try? JSONDecoder().decode(AppSettings.self, from: data) else {
+            let defaults = AppSettings()
+            defaults.save()
+            return defaults
+        }
+        return settings
+    }
+    
+    func save() {
+        if let data = try? JSONEncoder().encode(self) {
+            UserDefaults.standard.set(data, forKey: AppSettings.settingsKey)
+        }
+    }
+    
+    /// Common whisper.cpp install locations
+    static let commonWhisperPaths: [String] = [
+        "/opt/homebrew/bin/whisper-cli",
+        "/usr/local/bin/whisper-cli",
+        "/opt/homebrew/bin/whisper-cpp",
+        "/usr/local/bin/whisper-cpp",
+        "/opt/homebrew/bin/main",
+        "/usr/local/bin/main"
+    ]
+    
+    static func applicationSupportDirectory() -> String {
+        let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        let appDir = appSupport.appendingPathComponent("VideoTranscribe/Models")
+        return appDir.path
+    }
+    
+    /// Common model directories
+    static let commonModelPaths: [String] = [
+        applicationSupportDirectory(),
+        NSHomeDirectory() + "/.cache/whisper",
+        NSHomeDirectory() + "/whisper.cpp/models",
+        "/usr/local/share/whisper/models",
+        "/opt/homebrew/share/whisper/models",
+    ]
+    
+    func resolvedWhisperPath() -> String? {
+        // Check configured path
+        if FileManager.default.isExecutableFile(atPath: whisperPath) {
+            return whisperPath
+        }
+        
+        // Check common paths
+        for path in Self.commonWhisperPaths {
+            if FileManager.default.isExecutableFile(atPath: path) {
+                return path
+            }
+        }
+        
+        // Check PATH via `which`
+        let process = Process()
+        let pipe = Pipe()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
+        process.arguments = ["which", "whisper-cli"]
+        process.standardOutput = pipe
+        process.standardError = FileHandle.nullDevice
+        process.environment = ProcessInfo.processInfo.environment
+        
+        // Add Homebrew paths
+        var env = process.environment ?? [:]
+        let homebrewPaths = "/opt/homebrew/bin:/usr/local/bin"
+        env["PATH"] = homebrewPaths + ":" + (env["PATH"] ?? "")
+        process.environment = env
+        
+        try? process.run()
+        process.waitUntilExit()
+        
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        if let path = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines),
+           !path.isEmpty {
+            return path
+        }
+        
+        return nil
+    }
+    
+    func resolvedModelsDirectory() -> String? {
+        if !modelsDirectory.isEmpty && FileManager.default.fileExists(atPath: modelsDirectory) {
+            return modelsDirectory
+        }
+        
+        for path in Self.commonModelPaths {
+            if FileManager.default.fileExists(atPath: path) {
+                return path
+            }
+        }
+        
+        return nil
+    }
+}
+
+enum TranscriptionLanguage: String, CaseIterable, Identifiable, Codable {
+    case auto = "auto"
+    case english = "en"
+    case spanish = "es"
+    case french = "fr"
+    case german = "de"
+    case italian = "it"
+    case portuguese = "pt"
+    case russian = "ru"
+    case japanese = "ja"
+    case korean = "ko"
+    case chinese = "zh"
+    case arabic = "ar"
+    case hindi = "hi"
+    case dutch = "nl"
+    case polish = "pl"
+    case turkish = "tr"
+    case swedish = "sv"
+    case czech = "cs"
+    case danish = "da"
+    case finnish = "fi"
+    case greek = "el"
+    case hungarian = "hu"
+    case indonesian = "id"
+    case malay = "ms"
+    case norwegian = "no"
+    case romanian = "ro"
+    case slovak = "sk"
+    case thai = "th"
+    case ukrainian = "uk"
+    case vietnamese = "vi"
+    
+    var id: String { rawValue }
+    
+    var displayName: String {
+        switch self {
+        case .auto: return "Auto-Detect"
+        case .english: return "English"
+        case .spanish: return "Spanish"
+        case .french: return "French"
+        case .german: return "German"
+        case .italian: return "Italian"
+        case .portuguese: return "Portuguese"
+        case .russian: return "Russian"
+        case .japanese: return "Japanese"
+        case .korean: return "Korean"
+        case .chinese: return "Chinese"
+        case .arabic: return "Arabic"
+        case .hindi: return "Hindi"
+        case .dutch: return "Dutch"
+        case .polish: return "Polish"
+        case .turkish: return "Turkish"
+        case .swedish: return "Swedish"
+        case .czech: return "Czech"
+        case .danish: return "Danish"
+        case .finnish: return "Finnish"
+        case .greek: return "Greek"
+        case .hungarian: return "Hungarian"
+        case .indonesian: return "Indonesian"
+        case .malay: return "Malay"
+        case .norwegian: return "Norwegian"
+        case .romanian: return "Romanian"
+        case .slovak: return "Slovak"
+        case .thai: return "Thai"
+        case .ukrainian: return "Ukrainian"
+        case .vietnamese: return "Vietnamese"
+        }
+    }
+}
+
+enum ExportFormat: String, CaseIterable {
+    case txt = "Plain Text"
+    case srt = "SRT Subtitles"
+    case json = "JSON"
+    
+    var fileExtension: String {
+        switch self {
+        case .txt: return ".txt"
+        case .srt: return ".srt"
+        case .json: return ".json"
+        }
+    }
+    
+    var contentType: UTType {
+        switch self {
+        case .txt: return .plainText
+        case .srt: return UTType(filenameExtension: "srt") ?? .plainText
+        case .json: return .json
+        }
+    }
+    
+    var icon: String {
+        switch self {
+        case .txt: return "doc.text"
+        case .srt: return "captions.bubble"
+        case .json: return "curlybraces"
+        }
+    }
+}
+
+import UniformTypeIdentifiers
