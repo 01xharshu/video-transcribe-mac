@@ -1,11 +1,11 @@
 import Foundation
+import UniformTypeIdentifiers
 
 struct AppSettings: Codable {
     var selectedModel: WhisperModel = .largev3turbo
     var whisperPath: String = "/opt/homebrew/bin/whisper-cli"
     var modelsDirectory: String = ""
     var outputDirectory: URL? = nil
-    var enableTimestamps: Bool = true
     var language: TranscriptionLanguage = .auto
     var autoCleanup: Bool = true
     var enableLightFormatting: Bool = false
@@ -55,31 +55,39 @@ struct AppSettings: Codable {
     ]
     
     func resolvedWhisperPath() -> String? {
-        // Check configured path
+        // 1. Check App Bundle
+        if let bundlePath = Bundle.main.path(forResource: "whisper-cli", ofType: nil, inDirectory: "bin") {
+            if FileManager.default.isExecutableFile(atPath: bundlePath) {
+                return bundlePath
+            }
+        }
+        
+        // 2. Check configured path
         if FileManager.default.isExecutableFile(atPath: whisperPath) {
             return whisperPath
         }
         
-        // Check common paths
+        // 3. Check common paths
         for path in Self.commonWhisperPaths {
             if FileManager.default.isExecutableFile(atPath: path) {
                 return path
             }
         }
         
-        // Check PATH via `which`
+        // 4. Check PATH via `which`
+        return findInPath("whisper-cli") ?? findInPath("whisper-cpp") ?? findInPath("main")
+    }
+    
+    private func findInPath(_ name: String) -> String? {
         let process = Process()
         let pipe = Pipe()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
-        process.arguments = ["which", "whisper-cli"]
+        process.arguments = ["which", name]
         process.standardOutput = pipe
         process.standardError = FileHandle.nullDevice
-        process.environment = ProcessInfo.processInfo.environment
         
-        // Add Homebrew paths
-        var env = process.environment ?? [:]
-        let homebrewPaths = "/opt/homebrew/bin:/usr/local/bin"
-        env["PATH"] = homebrewPaths + ":" + (env["PATH"] ?? "")
+        var env = ProcessInfo.processInfo.environment
+        env["PATH"] = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:" + (env["PATH"] ?? "")
         process.environment = env
         
         try? process.run()
@@ -90,15 +98,28 @@ struct AppSettings: Codable {
            !path.isEmpty {
             return path
         }
-        
         return nil
     }
-    
+
     func resolvedModelsDirectory() -> String? {
+        // 1. Check App Bundle
+        if let bundleModelsPath = Bundle.main.resourceURL?.appendingPathComponent("models").path {
+            if FileManager.default.fileExists(atPath: bundleModelsPath) {
+                // Check if the specific model exists in bundle
+                let modelFile = selectedModel.modelFileName
+                let fullPath = (bundleModelsPath as NSString).appendingPathComponent(modelFile)
+                if FileManager.default.fileExists(atPath: fullPath) {
+                    return bundleModelsPath
+                }
+            }
+        }
+        
+        // 2. Check configured path
         if !modelsDirectory.isEmpty && FileManager.default.fileExists(atPath: modelsDirectory) {
             return modelsDirectory
         }
         
+        // 3. Check common paths
         for path in Self.commonModelPaths {
             if FileManager.default.fileExists(atPath: path) {
                 return path

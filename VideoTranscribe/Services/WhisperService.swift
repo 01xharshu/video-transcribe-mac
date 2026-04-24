@@ -48,10 +48,6 @@ final class WhisperService {
             arguments += ["-t", String(settings.threads)]
         }
         
-        // Timestamps
-        if settings.enableTimestamps {
-            arguments += ["--max-len", "0"] // Don't limit segment length
-        }
         
         let process = Process()
         let outputPipe = Pipe()

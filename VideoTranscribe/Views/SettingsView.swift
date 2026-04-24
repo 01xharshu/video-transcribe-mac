@@ -171,13 +171,6 @@ struct OutputSettingsView: View {
         
         Form {
             Section {
-                Toggle("Include Timestamps", isOn: $state.settings.enableTimestamps)
-                
-                Text("Shows timestamps next to transcript segments.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .padding(.leading, 20)
-                
                 Toggle("Auto-cleanup temporary files", isOn: $state.settings.autoCleanup)
                 
                 Text("Deletes extracted audio files after transcription completes.")
@@ -209,7 +202,6 @@ struct OutputSettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .onChange(of: settings.enableTimestamps) { _, _ in appState.settings.save() }
         .onChange(of: settings.autoCleanup) { _, _ in appState.settings.save() }
     }
     

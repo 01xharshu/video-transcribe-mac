@@ -1,49 +1,45 @@
-# Video Transcribe (macOS)
+# Video Transcribe (macOS) `v0.11 alpha`
 
-A clean, native macOS app built with SwiftUI that transcribed videos locally on your Mac using `ffmpeg` and `whisper.cpp`.
+A premium, native macOS app built with SwiftUI that transcribes videos locally on your Mac using AI. Powered by `whisper.cpp` and `FFmpeg`.
 
 ## Features
-- **100% Local & Private:** No cloud APIs. Maximum privacy.
-- **Metal Accelerated:** Uses whisper.cpp with CoreML/Metal support for fast processing on Apple Silicon (M1-M5).
-- **Native UI:** Clean SwiftUI interface with Dark Mode support and drop zones.
-- **Format Support:** Drag and drop MP4, MOV, MKV, WebM, and more.
-- **Timestamps:** Optional segment-level timestamps.
-- **Exporting:** Copy to clipboard, export as Plain Text (.txt), Subtitles (.srt), or JSON (.json).
+- **100% Local & Private:** No cloud APIs. All processing stays on your machine.
+- **Self-Contained (NEW):** Whisper, FFmpeg, and AI models are now bundled directly within the app. No manual setup required.
+- **Reader Mode:** Pop-out transcripts into a dedicated window for a distraction-free reading experience.
+- **Premium Aesthetics:** Clean SwiftUI interface with a persistent status bar, professional iconography, and glassmorphic design.
+- **Native AI Acceleration:** Optimized for Apple Silicon (M1-M4) using Metal/CoreML.
+- **Smart Formatting:** Export transcripts as Microsoft Word (.doc), Subtitles (.srt), JSON, or Plain Text.
+- **Integrated Search:** Quickly find keywords within your transcripts using the built-in search functionality.
 
 ## Requirements
 - macOS 14.0 or later (Optimized for macOS 15 Sequoia)
-- Apple Silicon recommended for performance
+- Apple Silicon (M1, M2, M3, M4) recommended
 
 ## Installation
 
-### Dependencies
-The app requires `ffmpeg` to extract audio and `whisper.cpp` to run the transcription models. The app provides a setup guide on first run, but you can install them via Homebrew:
+### 🚀 Zero-Setup Build
+The app now automatically bundles its own dependencies during the build process. To create the standalone `.app` bundle:
 
-```bash
-brew install ffmpeg
-brew install whisper-cpp
+1.  Clone the repository.
+2.  Ensure you have `ffmpeg` and `whisper-cli` installed on your system *once* (the build script will grab them from your system and bundle them into the app for portability).
+3.  Run the build script:
+    ```bash
+    ./build_app.sh
+    ```
+4.  Double-click **Video Transcribe.app** in the project root.
 
-# Download a high-quality transcription model
-whisper-cpp-download-ggml-model large-v3-turbo
-```
-
-### Building the App
-You can build the native macOS `.app` bundle using the included build script:
-
-```bash
-./build_app.sh
-```
-
-Alternatively, you can open the project directly in Xcode:
-1. Open the `Package.swift` file in Xcode (`open Package.swift`)
-2. Select the "VideoTranscribe" executable target.
-3. Click Run (Cmd+R).
+## What's New in v0.11 Alpha
+- **Persistent Status Bar:** Real-time health monitoring of AI engines and transcription progress.
+- **Action Bar:** Prominent "Copy to Clipboard" and "Save as Word" buttons with icons and text.
+- **Reader Mode Window:** Separate window support for viewing transcripts with serif typography and integrated search.
+- **Bundled Dependencies:** Fixed dynamic library linking issues (exit code 6) by embedding `.dylib` files directly into the bundle.
+- **Clean UI:** Removed unnecessary timestamps for a more readable, document-like experience.
 
 ## Architecture
-- **SwiftUI (`@Observable`):** Modern state management and reactive UI.
-- **`FFmpegService`:** Extracts 16kHz mono audio tracks asynchronously via CLI.
-- **`WhisperService`:** Executes the `whisper-cpp` binary locally, capturing stdout/stderr for real-time progress and JSON parsing.
-- **`AppState`:** Orchestrates jobs, parsing queues, estimating transcription time, and managing dependencies.
+- **SwiftUI (`@Observable`):** Modern reactive state management.
+- **`WhisperService`:** Manages local AI inference with real-time regex-based progress parsing.
+- **`FFmpegService`:** Handles high-performance audio extraction and duration detection.
+- **Bundled Resources:** Binaries and libraries are located in `Contents/Resources/bin` and `lib`.
 
 ## License
 MIT

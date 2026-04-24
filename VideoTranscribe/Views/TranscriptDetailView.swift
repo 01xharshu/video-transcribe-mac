@@ -15,7 +15,12 @@ struct TranscriptDetailView: View {
             headerView
                 .padding()
                 .background(.background)
-                .border(width: 1, edges: [.bottom], color: Color.secondary.opacity(0.2))
+            
+            if job.status == .completed {
+                actionsBar
+            } else {
+                Divider()
+            }
             
             // Content
             if job.status == .pending || job.status == .downloadingModel || job.status == .extractingAudio || job.status == .transcribing {
@@ -33,31 +38,11 @@ struct TranscriptDetailView: View {
             ToolbarItemGroup(placement: .primaryAction) {
                 if job.status == .completed {
                     Button {
-                        appState.copyCurrentTranscript()
-                    } label: {
-                        Label("Copy", systemImage: "doc.on.doc")
-                    }
-                    .help("Copy full transcript")
-                    
-                    Button {
                         openWindow(id: "transcript-reader", value: job.id)
                     } label: {
                         Label("Reader Mode", systemImage: "book.pages")
                     }
                     .help("Open in a new reader window")
-                    
-                    Menu {
-                        ForEach(ExportFormat.allCases, id: \.self) { format in
-                            Button {
-                                appState.exportTranscript(job: job, format: format)
-                            } label: {
-                                Label(format.rawValue, systemImage: format.icon)
-                            }
-                        }
-                    } label: {
-                        Label("Export", systemImage: "square.and.arrow.up")
-                    }
-                    .help("Export transcript")
                 }
             }
         }
@@ -93,6 +78,47 @@ struct TranscriptDetailView: View {
             
             Spacer()
         }
+    }
+    
+    private var actionsBar: some View {
+        HStack(spacing: 12) {
+            Button {
+                appState.copyCurrentTranscript()
+            } label: {
+                Label("Copy to Clipboard", systemImage: "doc.on.doc")
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.regular)
+            
+            Button {
+                appState.exportTranscript(job: job, format: .doc)
+            } label: {
+                Label("Save as Word (.doc)", systemImage: "doc.richtext")
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.regular)
+            
+            Menu {
+                ForEach(ExportFormat.allCases.filter { $0 != .doc }, id: \.self) { format in
+                    Button {
+                        appState.exportTranscript(job: job, format: format)
+                    } label: {
+                        Label(format.rawValue, systemImage: format.icon)
+                    }
+                }
+            } label: {
+                Label("Other Formats", systemImage: "ellipsis.circle")
+            }
+            .menuStyle(.button)
+            .buttonStyle(.bordered)
+            .controlSize(.regular)
+            
+            Spacer()
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 10)
+        .background(Color.secondary.opacity(0.03))
+        .border(width: 1, edges: [.bottom], color: Color.secondary.opacity(0.1))
     }
     
     private var loadingView: some View {
@@ -171,38 +197,11 @@ struct TranscriptDetailView: View {
     private func transcriptView(_ transcript: String) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                if appState.settings.enableTimestamps && !job.segments.isEmpty {
-                    LazyVStack(alignment: .leading, spacing: 12) {
-                        ForEach(job.segments) { segment in
-                            HStack(alignment: .top, spacing: 16) {
-                                Text(segment.startTimestamp)
-                                    .font(.system(.caption, design: .monospaced))
-                                    .foregroundStyle(.secondary)
-                                    .padding(.top, 2)
-                                    .frame(width: 85, alignment: .leading)
-                                
-                                Text(segment.text)
-                                    .font(.body)
-                                    .textSelection(.enabled)
-                                    .lineSpacing(4)
-                            }
-                            .padding(.horizontal)
-                            .padding(.vertical, 4)
-                            .background(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .fill(Color.secondary.opacity(0.05))
-                                    .padding(.horizontal, 8)
-                            )
-                        }
-                    }
-                    .padding(.vertical)
-                } else {
-                    Text(transcript)
-                        .font(.body)
-                        .lineSpacing(6)
-                        .textSelection(.enabled)
-                        .padding()
-                }
+                Text(transcript)
+                    .font(.body)
+                    .lineSpacing(8)
+                    .textSelection(.enabled)
+                    .padding()
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }

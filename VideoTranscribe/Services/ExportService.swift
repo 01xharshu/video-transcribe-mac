@@ -4,15 +4,7 @@ final class ExportService {
     
     /// Export as plain text with optional timestamps
     func exportAsTxt(transcript: String, segments: [TranscriptionSegment]) -> String {
-        if segments.isEmpty {
-            return transcript
-        }
-        
-        var output = ""
-        for segment in segments {
-            output += "[\(segment.startTimestamp) → \(segment.endTimestamp)] \(segment.text)\n"
-        }
-        return output
+        return transcript
     }
     
     /// Export as SRT subtitle format
@@ -64,23 +56,12 @@ final class ExportService {
         var rtf = "{\\rtf1\\ansi\\deff0{\\fonttbl{\\f0 Arial;}}\n"
         rtf += "\\f0\\fs24 "
         
-        if segments.isEmpty {
-            let escaped = transcript.replacingOccurrences(of: "\\", with: "\\\\")
-                .replacingOccurrences(of: "{", with: "\\{")
-                .replacingOccurrences(of: "}", with: "\\}")
-                .replacingOccurrences(of: "\n", with: "\\line ")
-            rtf += escaped
-        } else {
-            for segment in segments {
-                rtf += "{\\b [\(segment.startTimestamp) \\u8594? \(segment.endTimestamp)]} "
-                let escaped = segment.text.replacingOccurrences(of: "\\", with: "\\\\")
-                    .replacingOccurrences(of: "{", with: "\\{")
-                    .replacingOccurrences(of: "}", with: "\\}")
-                    .replacingOccurrences(of: "\n", with: "\\line ")
-                rtf += escaped
-                rtf += "\\line\\line "
-            }
-        }
+        let escaped = transcript.replacingOccurrences(of: "\\", with: "\\\\")
+            .replacingOccurrences(of: "{", with: "\\{")
+            .replacingOccurrences(of: "}", with: "\\}")
+            .replacingOccurrences(of: "\n", with: "\\line ")
+        rtf += escaped
+        
         rtf += "}"
         return rtf
     }

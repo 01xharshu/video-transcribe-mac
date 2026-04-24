@@ -8,6 +8,13 @@ final class FFmpegService {
     }
     
     func findFFmpegPath() -> String? {
+        // 1. Check App Bundle
+        if let bundlePath = Bundle.main.path(forResource: "ffmpeg", ofType: nil, inDirectory: "bin") {
+            if FileManager.default.isExecutableFile(atPath: bundlePath) {
+                return bundlePath
+            }
+        }
+        
         let commonPaths = [
             "/opt/homebrew/bin/ffmpeg",
             "/usr/local/bin/ffmpeg",
