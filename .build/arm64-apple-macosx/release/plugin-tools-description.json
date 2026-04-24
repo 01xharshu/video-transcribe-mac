@@ -88,6 +88,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/TranscriptReaderView.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/swift-version--58304C5D6DBC2206.txt"
         },
         {
@@ -114,7 +118,8 @@
         "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/SettingsView.swift.o",
         "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/SetupGuideView.swift.o",
         "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/SidebarView.swift.o",
-        "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/TranscriptDetailView.swift.o"
+        "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/TranscriptDetailView.swift.o",
+        "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/TranscriptReaderView.swift.o"
       ],
       "otherArguments" : [
         "-target",
@@ -134,6 +139,7 @@
         "-entry-point-function-name",
         "-Xfrontend",
         "VideoTranscribe_main",
+        "-color-diagnostics",
         "-swift-version",
         "5",
         "-plugin-path",
@@ -230,6 +236,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/TranscriptReaderView.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/Modules/VideoTranscribe.swiftmodule"
         }
       ],
@@ -250,7 +260,8 @@
         "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/SettingsView.swift",
         "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/SetupGuideView.swift",
         "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/SidebarView.swift",
-        "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/TranscriptDetailView.swift"
+        "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/TranscriptDetailView.swift",
+        "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/TranscriptReaderView.swift"
       ],
       "tempsPath" : "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build",
       "wholeModuleOptimization" : true
@@ -283,6 +294,7 @@
       "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/SetupGuideView.swift",
       "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/SidebarView.swift",
       "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/TranscriptDetailView.swift",
+      "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/TranscriptReaderView.swift",
       "-I",
       "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/Modules",
       "-target",
@@ -302,6 +314,7 @@
       "-entry-point-function-name",
       "-Xfrontend",
       "VideoTranscribe_main",
+      "-color-diagnostics",
       "-swift-version",
       "5",
       "-plugin-path",
@@ -420,6 +433,10 @@
         {
           "kind" : "file",
           "name" : "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/TranscriptDetailView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/TranscriptReaderView.swift"
         }
       ],
       "outputFilePath" : "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/sources"
@@ -474,6 +491,10 @@
         {
           "kind" : "file",
           "name" : "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/TranscriptDetailView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/TranscriptReaderView.swift.o"
         },
         {
           "kind" : "file",

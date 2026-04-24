@@ -1,6 +1,8 @@
 import Foundation
+import Observation
 
-struct TranscriptionJob: Identifiable, Equatable {
+@Observable
+final class TranscriptionJob: Identifiable, Equatable {
     let id: UUID
     let inputURL: URL
     let addedDate: Date
@@ -47,7 +49,7 @@ struct TranscriptionJob: Identifiable, Equatable {
         self.addedDate = Date()
     }
     
-    mutating func estimateTimeRemaining() {
+    func estimateTimeRemaining() {
         guard let start = startTime, progress > 0.05 else {
             estimatedTimeRemaining = nil
             return

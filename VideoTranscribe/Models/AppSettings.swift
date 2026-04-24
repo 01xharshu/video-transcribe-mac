@@ -183,12 +183,14 @@ enum ExportFormat: String, CaseIterable {
     case txt = "Plain Text"
     case srt = "SRT Subtitles"
     case json = "JSON"
+    case doc = "Word Document (.doc)"
     
     var fileExtension: String {
         switch self {
         case .txt: return ".txt"
         case .srt: return ".srt"
         case .json: return ".json"
+        case .doc: return ".doc"
         }
     }
     
@@ -197,6 +199,7 @@ enum ExportFormat: String, CaseIterable {
         case .txt: return .plainText
         case .srt: return UTType(filenameExtension: "srt") ?? .plainText
         case .json: return .json
+        case .doc: return UTType(filenameExtension: "doc") ?? .plainText
         }
     }
     
@@ -205,6 +208,7 @@ enum ExportFormat: String, CaseIterable {
         case .txt: return "doc.text"
         case .srt: return "captions.bubble"
         case .json: return "curlybraces"
+        case .doc: return "doc.richtext"
         }
     }
 }

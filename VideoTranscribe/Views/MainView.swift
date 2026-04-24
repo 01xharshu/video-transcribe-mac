@@ -7,50 +7,107 @@ struct MainView: View {
     var body: some View {
         @Bindable var state = appState
         
-        VStack(spacing: 0) {
-            NavigationSplitView(columnVisibility: $columnVisibility) {
-                // Sidebar
-                SidebarView()
-                    .navigationSplitViewColumnWidth(min: 240, ideal: 280, max: 360)
-            } detail: {
-                // Main content
-                if let job = appState.selectedJob {
-                    TranscriptDetailView(job: job)
-                } else {
-                    DropZoneView()
-                }
+        NavigationSplitView(columnVisibility: $columnVisibility) {
+            // Sidebar
+            SidebarView()
+                .navigationSplitViewColumnWidth(min: 240, ideal: 280, max: 360)
+        } detail: {
+            // Main content
+            if let job = appState.selectedJob {
+                TranscriptDetailView(job: job)
+            } else {
+                DropZoneView()
             }
-            
-            // Bottom Status Bar
-            if let error = appState.globalError ?? appState.selectedJob?.errorMessage {
-                HStack(spacing: 8) {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundStyle(.red)
-                    Text(error)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
+        }
+        .safeAreaInset(edge: .bottom) {
+            VStack(spacing: 0) {
+                if let error = appState.globalError ?? appState.selectedJob?.errorMessage {
+                    HStack(spacing: 8) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundStyle(.red)
+                        Text(error)
+                            .font(.caption)
+                            .foregroundStyle(.primary)
+                            .lineLimit(1)
+                        
+                        Spacer()
+                        
+                        Button {
+                            if appState.globalError != nil {
+                                appState.globalError = nil
+                            } else if let id = appState.selectedJob?.id, let index = appState.jobs.firstIndex(where: { $0.id == id }) {
+                                appState.jobs[index].errorMessage = nil
+                            }
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundStyle(.secondary)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(.red.opacity(0.1))
+                    .overlay(Rectangle().frame(height: 1).foregroundStyle(.red.opacity(0.2)), alignment: .top)
+                }
+                
+                HStack(spacing: 16) {
+                    // System Status
+                    HStack(spacing: 8) {
+                        if appState.activeJobsCount > 0 {
+                            ProgressView()
+                                .controlSize(.small)
+                        } else {
+                            Circle()
+                                .fill(appState.ffmpegAvailable && appState.whisperAvailable ? Color.green : Color.red)
+                                .frame(width: 8, height: 8)
+                        }
+                        
+                        Text(appState.systemStatus)
+                            .font(.caption)
+                            .fontWeight(.medium)
+                    }
+                    
+                    Divider().frame(height: 14)
+                    
+                    // Dependencies
+                    HStack(spacing: 12) {
+                        StatusChip(name: "FFmpeg", icon: "waveform", isAvailable: appState.ffmpegAvailable)
+                        StatusChip(name: "Whisper", icon: "brain", isAvailable: appState.whisperAvailable)
+                    }
                     
                     Spacer()
                     
-                    Button {
-                        if appState.globalError != nil {
-                            appState.globalError = nil
-                        } else if let id = appState.selectedJob?.id, let index = appState.jobs.firstIndex(where: { $0.id == id }) {
-                            appState.jobs[index].errorMessage = nil
+                    // Detailed Job Status
+                    if let activeJob = appState.jobs.first(where: { $0.status != .pending && $0.status != .completed && $0.status != .failed }) {
+                        HStack(spacing: 10) {
+                            Text(activeJob.fileName)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                                .frame(maxWidth: 150)
+                            
+                            ProgressView(value: activeJob.progress)
+                                .progressViewStyle(.linear)
+                                .frame(width: 100)
+                                .controlSize(.small)
+                            
+                            Text("\(Int(activeJob.progress * 100))%")
+                                .font(.system(.caption, design: .monospaced))
+                                .foregroundStyle(.secondary)
                         }
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundStyle(.secondary)
                     }
-                    .buttonStyle(.plain)
                 }
                 .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .background(Color(NSColor.windowBackgroundColor))
-                .overlay(Rectangle().frame(height: 1).foregroundStyle(Color.secondary.opacity(0.2)), alignment: .top)
+                .padding(.vertical, 6)
+                .background(.ultraThinMaterial)
+                .overlay(Rectangle().frame(height: 1).foregroundStyle(Color.secondary.opacity(0.1)), alignment: .top)
             }
         }
+        .animation(.spring(), value: appState.globalError)
+        .animation(.spring(), value: appState.selectedJob?.errorMessage)
+        .animation(.spring(), value: appState.activeJobsCount)
+        .animation(.spring(), value: appState.ffmpegAvailable)
+        .animation(.spring(), value: appState.whisperAvailable)
         .navigationTitle("Video Transcribe")
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
@@ -154,6 +211,26 @@ struct MainView: View {
                 }
             }
         }
+    }
+}
+
+struct StatusChip: View {
+    let name: String
+    let icon: String
+    let isAvailable: Bool
+    
+    var body: some View {
+        HStack(spacing: 4) {
+            Image(systemName: icon)
+                .font(.caption2)
+            Text(name)
+                .font(.system(size: 10, weight: .bold))
+        }
+        .padding(.horizontal, 6)
+        .padding(.vertical, 2)
+        .background(isAvailable ? Color.green.opacity(0.15) : Color.red.opacity(0.15))
+        .foregroundStyle(isAvailable ? .green : .red)
+        .clipShape(Capsule())
     }
 }
 

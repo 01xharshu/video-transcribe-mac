@@ -33,7 +33,20 @@ final class AppState {
     }
     
     var activeJobsCount: Int {
-        jobs.filter { $0.status == .extractingAudio || $0.status == .transcribing }.count
+        jobs.filter { $0.status != .pending && $0.status != .completed && $0.status != .failed }.count
+    }
+    
+    var systemStatus: String {
+        if !ffmpegAvailable { return "FFmpeg Missing" }
+        if !whisperAvailable { return "Whisper Missing" }
+        
+        let active = jobs.filter { $0.status != .pending && $0.status != .completed && $0.status != .failed }
+        if let first = active.first {
+            return "\(first.status.rawValue)..."
+        }
+        
+        if jobs.isEmpty { return "Ready" }
+        return "Idle"
     }
     
     // MARK: - Dependency Checking
@@ -259,6 +272,8 @@ final class AppState {
                         content = self.exportService.exportAsSrt(segments: job.segments)
                     case .json:
                         content = self.exportService.exportAsJson(job: job)
+                    case .doc:
+                        content = self.exportService.exportAsDoc(transcript: transcript, segments: job.segments)
                     }
                     try content.write(to: url, atomically: true, encoding: .utf8)
                 } catch {

@@ -58,4 +58,30 @@ final class ExportService {
         
         return "{}"
     }
+    
+    /// Export as Word-compatible RTF (saved with .doc extension)
+    func exportAsDoc(transcript: String, segments: [TranscriptionSegment]) -> String {
+        var rtf = "{\\rtf1\\ansi\\deff0{\\fonttbl{\\f0 Arial;}}\n"
+        rtf += "\\f0\\fs24 "
+        
+        if segments.isEmpty {
+            let escaped = transcript.replacingOccurrences(of: "\\", with: "\\\\")
+                .replacingOccurrences(of: "{", with: "\\{")
+                .replacingOccurrences(of: "}", with: "\\}")
+                .replacingOccurrences(of: "\n", with: "\\line ")
+            rtf += escaped
+        } else {
+            for segment in segments {
+                rtf += "{\\b [\(segment.startTimestamp) \\u8594? \(segment.endTimestamp)]} "
+                let escaped = segment.text.replacingOccurrences(of: "\\", with: "\\\\")
+                    .replacingOccurrences(of: "{", with: "\\{")
+                    .replacingOccurrences(of: "}", with: "\\}")
+                    .replacingOccurrences(of: "\n", with: "\\line ")
+                rtf += escaped
+                rtf += "\\line\\line "
+            }
+        }
+        rtf += "}"
+        return rtf
+    }
 }

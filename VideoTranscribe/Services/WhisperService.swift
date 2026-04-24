@@ -79,16 +79,14 @@ final class WhisperService {
                       let output = String(data: data, encoding: .utf8) else { return }
                 stdoutCapture.append(output)
                 
-                // Parse progress: whisper.cpp prints "whisper_print_progress_callback: progress = XX%"
+                // Parse progress: support both "progress = XX%" and "[XX%]" formats
                 let lines = output.components(separatedBy: "\n")
                 for line in lines {
-                    if line.contains("progress =") || line.contains("progress=") {
-                        let cleaned = line.replacingOccurrences(of: "%", with: "")
-                        if let range = cleaned.range(of: #"\d+$"#, options: .regularExpression) {
-                            if let percent = Double(cleaned[range]) {
-                                DispatchQueue.main.async {
-                                    progressHandler(percent / 100.0)
-                                }
+                    if let range = line.range(of: #"(\d+)%"#, options: .regularExpression) {
+                        let percentStr = line[range].replacingOccurrences(of: "%", with: "")
+                        if let percent = Double(percentStr) {
+                            DispatchQueue.main.async {
+                                progressHandler(percent / 100.0)
                             }
                         }
                     }
@@ -105,13 +103,11 @@ final class WhisperService {
                 // whisper.cpp may also output progress to stderr
                 let lines = output.components(separatedBy: "\n")
                 for line in lines {
-                    if line.contains("progress =") || line.contains("progress=") {
-                        let cleaned = line.replacingOccurrences(of: "%", with: "")
-                        if let range = cleaned.range(of: #"\d+$"#, options: .regularExpression) {
-                            if let percent = Double(cleaned[range]) {
-                                DispatchQueue.main.async {
-                                    progressHandler(percent / 100.0)
-                                }
+                    if let range = line.range(of: #"(\d+)%"#, options: .regularExpression) {
+                        let percentStr = line[range].replacingOccurrences(of: "%", with: "")
+                        if let percent = Double(percentStr) {
+                            DispatchQueue.main.async {
+                                progressHandler(percent / 100.0)
                             }
                         }
                     }

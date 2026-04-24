@@ -3,6 +3,7 @@ import UniformTypeIdentifiers
 
 struct TranscriptDetailView: View {
     @Environment(AppState.self) private var appState
+    @Environment(\.openWindow) private var openWindow
     let job: TranscriptionJob
     
     @State private var searchText = ""
@@ -37,6 +38,13 @@ struct TranscriptDetailView: View {
                         Label("Copy", systemImage: "doc.on.doc")
                     }
                     .help("Copy full transcript")
+                    
+                    Button {
+                        openWindow(id: "transcript-reader", value: job.id)
+                    } label: {
+                        Label("Reader Mode", systemImage: "book.pages")
+                    }
+                    .help("Open in a new reader window")
                     
                     Menu {
                         ForEach(ExportFormat.allCases, id: \.self) { format in

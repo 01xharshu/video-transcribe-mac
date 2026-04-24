@@ -16,6 +16,16 @@ struct VideoTranscribeApp: App {
         .windowStyle(.titleBar)
         .windowToolbarStyle(.unified(showsTitle: true))
         .defaultSize(width: 1100, height: 720)
+        
+        WindowGroup(id: "transcript-reader", for: UUID.self) { $jobId in
+            if let jobId = jobId, let job = appState.jobs.first(where: { $0.id == jobId }) {
+                TranscriptReaderView(job: job)
+                    .environment(appState)
+            } else {
+                Text("No transcript selected")
+                    .padding()
+            }
+        }
         .commands {
             CommandGroup(replacing: .newItem) {
                 Button("Open Video Files…") {

@@ -99,5 +99,11 @@
     "swiftmodule": "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/TranscriptDetailView~partial.swiftmodule",
     "swift-dependencies": "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/TranscriptDetailView.swiftdeps",
     "diagnostics": "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/TranscriptDetailView.dia"
+  },
+  "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/TranscriptReaderView.swift": {
+    "object": "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/TranscriptReaderView.swift.o",
+    "swiftmodule": "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/TranscriptReaderView~partial.swiftmodule",
+    "swift-dependencies": "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/TranscriptReaderView.swiftdeps",
+    "diagnostics": "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/TranscriptReaderView.dia"
   }
 }
