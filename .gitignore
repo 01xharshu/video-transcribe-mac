@@ -23,3 +23,8 @@ whisper-models/
 
 # Distribution
 *.dmg
+
+# Temporary Icon generation files
+fix_icon.py
+clean_icon.png
+MyIcon.iconset/
