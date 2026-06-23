@@ -19,6 +19,7 @@ struct VideoTranscribeApp: App {
         
         Settings {
             SettingsView()
+                .environment(appState)
         }
         
         WindowGroup(id: "transcript-reader", for: UUID.self) { $jobId in

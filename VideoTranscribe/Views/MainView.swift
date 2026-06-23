@@ -31,40 +31,16 @@ struct MainView: View {
                 toolbarContent
             }
         }
-        .overlay(alignment: .bottom) {
-            if let error = appState.globalError ?? appState.selectedJob?.errorMessage {
-                HStack(spacing: 12) {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundStyle(.red)
-                    Text(error)
-                        .font(.system(.subheadline, weight: .medium))
-                        .foregroundStyle(.primary)
-                        .lineLimit(2)
-                    
-                    Spacer()
-                    
-                    Button {
-                        withAnimation(.spring()) {
-                            if appState.globalError != nil {
-                                appState.globalError = nil
-                            } else if let id = appState.selectedJob?.id, let index = appState.jobs.firstIndex(where: { $0.id == id }) {
-                                appState.jobs[index].errorMessage = nil
-                            }
-                        }
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundStyle(.secondary)
-                    }
-                    .buttonStyle(.plain)
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-                .background(.ultraThinMaterial)
-                .background(Color.red.opacity(0.1))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-                .shadow(color: .black.opacity(0.1), radius: 10, y: 5)
-                .padding(20)
-                .transition(.move(edge: .bottom).combined(with: .opacity))
+        .alert("Error", isPresented: Binding(
+            get: { appState.globalError != nil },
+            set: { if !$0 { appState.globalError = nil } }
+        )) {
+            Button("OK", role: .cancel) {
+                appState.globalError = nil
+            }
+        } message: {
+            if let error = appState.globalError {
+                Text(error)
             }
         }
         .fileImporter(

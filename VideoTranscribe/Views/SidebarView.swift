@@ -101,23 +101,15 @@ struct JobRowView: View {
                         if job.isYouTube {
                             HStack(spacing: 3) {
                                 Image(systemName: "play.rectangle.fill")
-                                    .font(.system(size: 9))
-                                Text("YT")
-                                    .font(.system(.caption2, design: .rounded, weight: .bold))
+                                    .font(.system(size: 10))
+                                Text("YouTube")
+                                    .font(.caption)
                             }
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.red.opacity(0.15))
                             .foregroundStyle(.red)
-                            .clipShape(Capsule())
                         } else {
                             Text(job.fileExtension.uppercased())
-                                .font(.system(.caption2, design: .rounded, weight: .bold))
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                                .background(Color.secondary.opacity(0.15))
+                                .font(.caption)
                                 .foregroundStyle(.secondary)
-                                .clipShape(Capsule())
                         }
                         
                         if !job.isYouTube {

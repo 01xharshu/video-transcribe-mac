@@ -16,9 +16,7 @@ struct TranscriptDetailView: View {
                 .padding()
                 .background(.background)
             
-            if job.status == .completed {
-                actionsBar
-            } else {
+            if job.status != .completed {
                 Divider()
             }
             
@@ -36,6 +34,25 @@ struct TranscriptDetailView: View {
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
                 if job.status == .completed {
+                    Button {
+                        appState.copyCurrentTranscript()
+                    } label: {
+                        Label("Copy", systemImage: "doc.on.doc")
+                    }
+                    .help("Copy transcript to clipboard")
+                    
+                    Menu {
+                        Button("Word Document (.doc)") { appState.exportTranscript(job: job, format: .doc) }
+                        ForEach(ExportFormat.allCases.filter { $0 != .doc }, id: \.self) { format in
+                            Button(format.rawValue) {
+                                appState.exportTranscript(job: job, format: format)
+                            }
+                        }
+                    } label: {
+                        Label("Export", systemImage: "square.and.arrow.up")
+                    }
+                    .help("Export transcript")
+                    
                     Button {
                         openWindow(id: "transcript-reader", value: job.id)
                     } label: {
@@ -85,46 +102,7 @@ struct TranscriptDetailView: View {
         }
     }
     
-    private var actionsBar: some View {
-        HStack(spacing: 12) {
-            Button {
-                appState.copyCurrentTranscript()
-            } label: {
-                Label("Copy to Clipboard", systemImage: "doc.on.doc")
-            }
-            .buttonStyle(.bordered)
-            .controlSize(.regular)
-            
-            Button {
-                appState.exportTranscript(job: job, format: .doc)
-            } label: {
-                Label("Save as Word (.doc)", systemImage: "doc.richtext")
-            }
-            .buttonStyle(.bordered)
-            .controlSize(.regular)
-            
-            Menu {
-                ForEach(ExportFormat.allCases.filter { $0 != .doc }, id: \.self) { format in
-                    Button {
-                        appState.exportTranscript(job: job, format: format)
-                    } label: {
-                        Label(format.rawValue, systemImage: format.icon)
-                    }
-                }
-            } label: {
-                Label("Other Formats", systemImage: "ellipsis.circle")
-            }
-            .menuStyle(.button)
-            .buttonStyle(.bordered)
-            .controlSize(.regular)
-            
-            Spacer()
-        }
-        .padding(.horizontal)
-        .padding(.vertical, 10)
-        .background(Color.secondary.opacity(0.03))
-        .border(width: 1, edges: [.bottom], color: Color.secondary.opacity(0.1))
-    }
+
     
     private var loadingView: some View {
         VStack(spacing: 24) {

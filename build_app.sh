@@ -5,11 +5,11 @@ set -e
 
 echo "🔨 Building Video Transcribe App..."
 
-# Build the executable using Swift Package Manager
-swift build -c release --disable-sandbox
+# Build the executable using Swift Package Manager as a Universal Binary (Intel + Apple Silicon)
+swift build -c release --disable-sandbox --arch arm64 --arch x86_64
 
 # Find the executable path
-EXECUTABLE_PATH=$(swift build -c release --disable-sandbox --show-bin-path)/VideoTranscribe
+EXECUTABLE_PATH=$(swift build -c release --disable-sandbox --arch arm64 --arch x86_64 --show-bin-path)/VideoTranscribe
 
 # Create the App bundle structure
 APP_NAME="Video Transcribe"

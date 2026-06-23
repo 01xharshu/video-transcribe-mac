@@ -20,3 +20,6 @@ test.wav
 
 # Downloaded models or temporary dependencies
 whisper-models/
+
+# Distribution
+*.dmg
