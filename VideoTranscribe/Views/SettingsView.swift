@@ -227,15 +227,6 @@ struct AdvancedSettingsView: View {
         let settings = state.settings
         
         Form {
-            Section("whisper.cpp Binary Path") {
-                TextField("", text: $state.settings.whisperPath)
-                    .textFieldStyle(.roundedBorder)
-                
-                Text("Path to whisper-cpp executable. Leave default if installed via Homebrew.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            
             Section("Models Directory (Optional)") {
                 HStack {
                     TextField("", text: $state.settings.modelsDirectory)
@@ -265,7 +256,6 @@ struct AdvancedSettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .onChange(of: settings.whisperPath) { _, _ in appState.settings.save() }
         .onChange(of: settings.modelsDirectory) { _, _ in appState.settings.save() }
         .onChange(of: settings.threads) { _, _ in appState.settings.save() }
     }

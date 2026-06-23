@@ -23,7 +23,7 @@ struct TranscriptDetailView: View {
             }
             
             // Content
-            if job.status == .pending || job.status == .downloadingModel || job.status == .extractingAudio || job.status == .transcribing {
+            if job.status == .pending || job.status == .downloadingVideo || job.status == .downloadingModel || job.status == .extractingAudio || job.status == .transcribing {
                 loadingView
             } else if job.status == .failed {
                 errorView
@@ -33,7 +33,6 @@ struct TranscriptDetailView: View {
                 ContentUnavailableView("No Transcript", systemImage: "doc.text")
             }
         }
-        .background(Color(NSColor.textBackgroundColor))
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
                 if job.status == .completed {
@@ -61,6 +60,12 @@ struct TranscriptDetailView: View {
                     Label(job.fileSizeFormatted, systemImage: "doc.fill")
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                    
+                    if job.isYouTube {
+                        Label("YouTube", systemImage: "play.rectangle.fill")
+                            .font(.caption)
+                            .foregroundStyle(.red)
+                    }
                     
                     if let lang = job.detectedLanguage {
                         Label(lang.uppercased(), systemImage: "globe")
@@ -144,7 +149,7 @@ struct TranscriptDetailView: View {
                     ProgressView(value: job.progress)
                         .progressViewStyle(.circular)
                         .controlSize(.large)
-                        .tint(job.status == .extractingAudio ? .orange : (job.status == .downloadingModel ? .purple : .blue))
+                        .tint(job.status == .downloadingVideo ? .red : (job.status == .extractingAudio ? .orange : (job.status == .downloadingModel ? .purple : .blue)))
                     
                     Text(job.status.rawValue)
                         .font(.title3)
@@ -158,7 +163,11 @@ struct TranscriptDetailView: View {
                             .foregroundStyle(.secondary)
                     }
                     
-                    if job.status == .downloadingModel {
+                    if job.status == .downloadingVideo {
+                        Text("Downloading from YouTube...")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    } else if job.status == .downloadingModel {
                         Text("Downloading \(appState.settings.selectedModel.displayName) Model...")
                             .font(.caption)
                             .foregroundStyle(.secondary)
@@ -198,12 +207,13 @@ struct TranscriptDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
                 Text(transcript)
-                    .font(.body)
-                    .lineSpacing(8)
+                    .font(.system(size: 18, weight: .regular, design: .serif))
+                    .lineSpacing(10)
                     .textSelection(.enabled)
-                    .padding()
+                    .padding(32)
+                    .frame(maxWidth: 800, alignment: .leading)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(maxWidth: .infinity, alignment: .center)
         }
     }
 }

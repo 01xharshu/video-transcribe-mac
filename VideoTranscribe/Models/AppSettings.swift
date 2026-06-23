@@ -55,49 +55,13 @@ struct AppSettings: Codable {
     ]
     
     func resolvedWhisperPath() -> String? {
-        // 1. Check App Bundle
+        // Only use the bundled Whisper CLI
         if let bundlePath = Bundle.main.path(forResource: "whisper-cli", ofType: nil, inDirectory: "bin") {
             if FileManager.default.isExecutableFile(atPath: bundlePath) {
                 return bundlePath
             }
         }
         
-        // 2. Check configured path
-        if FileManager.default.isExecutableFile(atPath: whisperPath) {
-            return whisperPath
-        }
-        
-        // 3. Check common paths
-        for path in Self.commonWhisperPaths {
-            if FileManager.default.isExecutableFile(atPath: path) {
-                return path
-            }
-        }
-        
-        // 4. Check PATH via `which`
-        return findInPath("whisper-cli") ?? findInPath("whisper-cpp") ?? findInPath("main")
-    }
-    
-    private func findInPath(_ name: String) -> String? {
-        let process = Process()
-        let pipe = Pipe()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
-        process.arguments = ["which", name]
-        process.standardOutput = pipe
-        process.standardError = FileHandle.nullDevice
-        
-        var env = ProcessInfo.processInfo.environment
-        env["PATH"] = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:" + (env["PATH"] ?? "")
-        process.environment = env
-        
-        try? process.run()
-        process.waitUntilExit()
-        
-        let data = pipe.fileHandleForReading.readDataToEndOfFile()
-        if let path = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines),
-           !path.isEmpty {
-            return path
-        }
         return nil
     }
 

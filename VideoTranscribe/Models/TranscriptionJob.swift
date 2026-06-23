@@ -4,8 +4,12 @@ import Observation
 @Observable
 final class TranscriptionJob: Identifiable, Equatable {
     let id: UUID
-    let inputURL: URL
+    var inputURL: URL
     let addedDate: Date
+    
+    // YouTube support
+    var youtubeURL: String? = nil
+    var youtubeTitle: String? = nil
     
     var status: JobStatus = .pending
     var progress: Double = 0.0
@@ -21,8 +25,15 @@ final class TranscriptionJob: Identifiable, Equatable {
     var errorMessage: String? = nil
     var warning: String? = nil
     
+    var isYouTube: Bool {
+        youtubeURL != nil
+    }
+    
     var fileName: String {
-        inputURL.deletingPathExtension().lastPathComponent
+        if let title = youtubeTitle, !title.isEmpty {
+            return title
+        }
+        return inputURL.deletingPathExtension().lastPathComponent
     }
     
     var fileExtension: String {
@@ -46,6 +57,15 @@ final class TranscriptionJob: Identifiable, Equatable {
     init(inputURL: URL) {
         self.id = UUID()
         self.inputURL = inputURL
+        self.addedDate = Date()
+    }
+    
+    init(youtubeURL: String, title: String? = nil) {
+        self.id = UUID()
+        self.youtubeURL = youtubeURL
+        self.youtubeTitle = title
+        // Placeholder URL until download completes
+        self.inputURL = URL(fileURLWithPath: "/tmp/youtube-placeholder")
         self.addedDate = Date()
     }
     
@@ -80,6 +100,7 @@ final class TranscriptionJob: Identifiable, Equatable {
 
 enum JobStatus: String, Equatable {
     case pending = "Pending"
+    case downloadingVideo = "Downloading Video"
     case downloadingModel = "Downloading Model"
     case extractingAudio = "Extracting Audio"
     case transcribing = "Transcribing"
@@ -89,6 +110,7 @@ enum JobStatus: String, Equatable {
     var icon: String {
         switch self {
         case .pending: return "clock"
+        case .downloadingVideo: return "arrow.down.circle"
         case .downloadingModel: return "arrow.down.circle"
         case .extractingAudio: return "waveform"
         case .transcribing: return "text.word.spacing"
@@ -100,6 +122,7 @@ enum JobStatus: String, Equatable {
     var color: String {
         switch self {
         case .pending: return "secondary"
+        case .downloadingVideo: return "red"
         case .downloadingModel: return "purple"
         case .extractingAudio: return "orange"
         case .transcribing: return "blue"

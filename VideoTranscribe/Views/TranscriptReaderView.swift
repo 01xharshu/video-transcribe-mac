@@ -57,10 +57,11 @@ struct TranscriptReaderView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     if let transcript = job.fullTranscript {
                         Text(highlightSearch(transcript))
-                            .font(.system(.body, design: .serif))
+                            .font(.system(size: 20, weight: .regular, design: .serif))
                             .textSelection(.enabled)
-                            .lineSpacing(10)
-                            .padding()
+                            .lineSpacing(12)
+                            .padding(40)
+                            .frame(maxWidth: 900, alignment: .leading)
                     } else {
                         ContentUnavailableView("No Transcript", systemImage: "doc.text")
                     }
@@ -71,7 +72,6 @@ struct TranscriptReaderView: View {
         }
         .navigationTitle("Reader: \(job.fileName)")
         .frame(minWidth: 600, minHeight: 400)
-        .background(Color(NSColor.textBackgroundColor))
     }
     
     

@@ -64,6 +64,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Services/YouTubeService.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/DropZoneView.swift"
         },
         {
@@ -73,10 +77,6 @@
         {
           "kind" : "file",
           "name" : "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/SettingsView.swift"
-        },
-        {
-          "kind" : "file",
-          "name" : "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/SetupGuideView.swift"
         },
         {
           "kind" : "file",
@@ -113,10 +113,10 @@
         "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/FFmpegService.swift.o",
         "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/ModelDownloader.swift.o",
         "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/WhisperService.swift.o",
+        "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/YouTubeService.swift.o",
         "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/DropZoneView.swift.o",
         "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/MainView.swift.o",
         "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/SettingsView.swift.o",
-        "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/SetupGuideView.swift.o",
         "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/SidebarView.swift.o",
         "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/TranscriptDetailView.swift.o",
         "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/TranscriptReaderView.swift.o"
@@ -144,7 +144,7 @@
         "-plugin-path",
         "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
         "-sdk",
-        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.4.sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
         "-F",
         "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
         "-I",
@@ -155,7 +155,7 @@
         "-Xcc",
         "-isysroot",
         "-Xcc",
-        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.4.sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
         "-Xcc",
         "-F",
         "-Xcc",
@@ -211,6 +211,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/YouTubeService.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/DropZoneView.swift.o"
         },
         {
@@ -220,10 +224,6 @@
         {
           "kind" : "file",
           "name" : "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/SettingsView.swift.o"
-        },
-        {
-          "kind" : "file",
-          "name" : "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/SetupGuideView.swift.o"
         },
         {
           "kind" : "file",
@@ -254,10 +254,10 @@
         "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Services/FFmpegService.swift",
         "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Services/ModelDownloader.swift",
         "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Services/WhisperService.swift",
+        "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Services/YouTubeService.swift",
         "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/DropZoneView.swift",
         "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/MainView.swift",
         "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/SettingsView.swift",
-        "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/SetupGuideView.swift",
         "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/SidebarView.swift",
         "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/TranscriptDetailView.swift",
         "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/TranscriptReaderView.swift"
@@ -287,10 +287,10 @@
       "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Services/FFmpegService.swift",
       "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Services/ModelDownloader.swift",
       "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Services/WhisperService.swift",
+      "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Services/YouTubeService.swift",
       "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/DropZoneView.swift",
       "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/MainView.swift",
       "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/SettingsView.swift",
-      "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/SetupGuideView.swift",
       "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/SidebarView.swift",
       "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/TranscriptDetailView.swift",
       "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/TranscriptReaderView.swift",
@@ -318,7 +318,7 @@
       "-plugin-path",
       "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
       "-sdk",
-      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.4.sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
       "-F",
       "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
       "-I",
@@ -329,7 +329,7 @@
       "-Xcc",
       "-isysroot",
       "-Xcc",
-      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.4.sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
       "-Xcc",
       "-F",
       "-Xcc",
@@ -410,6 +410,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Services/YouTubeService.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/DropZoneView.swift"
         },
         {
@@ -419,10 +423,6 @@
         {
           "kind" : "file",
           "name" : "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/SettingsView.swift"
-        },
-        {
-          "kind" : "file",
-          "name" : "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/SetupGuideView.swift"
         },
         {
           "kind" : "file",
@@ -480,10 +480,6 @@
         },
         {
           "kind" : "file",
-          "name" : "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/SetupGuideView.swift.o"
-        },
-        {
-          "kind" : "file",
           "name" : "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/SidebarView.swift.o"
         },
         {
@@ -513,6 +509,10 @@
         {
           "kind" : "file",
           "name" : "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/WhisperService.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/YouTubeService.swift.o"
         }
       ],
       "outputFilePath" : "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.product/Objects.LinkFileList"

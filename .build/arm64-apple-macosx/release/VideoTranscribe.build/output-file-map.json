@@ -64,6 +64,12 @@
     "swift-dependencies": "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/WhisperService.swiftdeps",
     "diagnostics": "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/WhisperService.dia"
   },
+  "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Services/YouTubeService.swift": {
+    "object": "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/YouTubeService.swift.o",
+    "swiftmodule": "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/YouTubeService~partial.swiftmodule",
+    "swift-dependencies": "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/YouTubeService.swiftdeps",
+    "diagnostics": "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/YouTubeService.dia"
+  },
   "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/DropZoneView.swift": {
     "object": "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/DropZoneView.swift.o",
     "swiftmodule": "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/DropZoneView~partial.swiftmodule",
@@ -81,12 +87,6 @@
     "swiftmodule": "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/SettingsView~partial.swiftmodule",
     "swift-dependencies": "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/SettingsView.swiftdeps",
     "diagnostics": "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/SettingsView.dia"
-  },
-  "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/SetupGuideView.swift": {
-    "object": "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/SetupGuideView.swift.o",
-    "swiftmodule": "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/SetupGuideView~partial.swiftmodule",
-    "swift-dependencies": "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/SetupGuideView.swiftdeps",
-    "diagnostics": "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/SetupGuideView.dia"
   },
   "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/VideoTranscribe/Views/SidebarView.swift": {
     "object": "/Users/harshmishra/Documents/GitHub/video-transcribe-mac/.build/arm64-apple-macosx/release/VideoTranscribe.build/SidebarView.swift.o",

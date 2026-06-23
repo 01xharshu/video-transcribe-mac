@@ -34,10 +34,25 @@ mkdir -p "${APP_BIN_DIR}"
 mkdir -p "${APP_LIB_DIR}"
 mkdir -p "${APP_MODELS_DIR}"
 
-# Find and copy whisper-cli and its dependencies
+# Download and package static dependencies
+echo "📦 Fetching static dependencies..."
+
+# 1. yt-dlp
+echo "   ⬇️ Downloading yt-dlp..."
+curl -L -s https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_macos -o "${APP_BIN_DIR}/yt-dlp"
+chmod +x "${APP_BIN_DIR}/yt-dlp"
+
+# 2. FFmpeg (static build from evermeet.cx)
+echo "   ⬇️ Downloading FFmpeg static..."
+curl -L -s https://evermeet.cx/ffmpeg/getrelease/zip -o /tmp/ffmpeg.zip
+unzip -q -o /tmp/ffmpeg.zip -d /tmp/
+cp /tmp/ffmpeg "${APP_BIN_DIR}/ffmpeg"
+chmod +x "${APP_BIN_DIR}/ffmpeg"
+
+# 3. Whisper-cli and its dynamic libraries
 WHISPER_SRC=$(which whisper-cli || which whisper-cpp || which main || echo "")
 if [ -n "$WHISPER_SRC" ]; then
-    echo "🤖 Bundling Whisper..."
+    echo "🤖 Bundling Whisper and fixing library paths..."
     cp "$WHISPER_SRC" "${APP_BIN_DIR}/whisper-cli"
     
     # Copy required libraries (detected from otool)
@@ -45,23 +60,18 @@ if [ -n "$WHISPER_SRC" ]; then
     cp /opt/homebrew/lib/libwhisper.*.dylib "${APP_LIB_DIR}/" 2>/dev/null || true
     cp /opt/homebrew/opt/ggml/lib/libggml*.dylib "${APP_LIB_DIR}/" 2>/dev/null || true
     cp /usr/local/lib/libwhisper.*.dylib "${APP_LIB_DIR}/" 2>/dev/null || true
-fi
-
-# Find and copy ffmpeg
-FFMPEG_SRC=$(which ffmpeg || echo "")
-if [ -n "$FFMPEG_SRC" ]; then
-    echo "🎥 Bundling FFmpeg..."
-    cp "$FFMPEG_SRC" "${APP_BIN_DIR}/ffmpeg"
     
-    # Also bundle ffprobe if exists
-    FFPROBE_SRC=$(which ffprobe || echo "")
-    if [ -n "$FFPROBE_SRC" ]; then
-        cp "$FFPROBE_SRC" "${APP_BIN_DIR}/ffprobe"
-    fi
+    # Change rpath logic so whisper-cli looks inside the app bundle
+    install_name_tool -change @rpath/libwhisper.1.dylib @executable_path/../lib/libwhisper.1.dylib "${APP_BIN_DIR}/whisper-cli" 2>/dev/null || true
+    install_name_tool -change /opt/homebrew/opt/ggml/lib/libggml.0.dylib @executable_path/../lib/libggml.0.dylib "${APP_BIN_DIR}/whisper-cli" 2>/dev/null || true
+    install_name_tool -change /opt/homebrew/opt/ggml/lib/libggml-base.0.dylib @executable_path/../lib/libggml-base.0.dylib "${APP_BIN_DIR}/whisper-cli" 2>/dev/null || true
     
-    # FFmpeg has too many dependencies to bundle manually without a specialized tool
-    # For now, we rely on the system ffmpeg if the bundled one fails due to missing libs
-    # but we'll try to copy the most common ones if they exist in standard paths
+    # Update libraries to point to bundled libggml files
+    for lib in "${APP_LIB_DIR}/"*.dylib; do
+        install_name_tool -change /opt/homebrew/opt/ggml/lib/libggml.0.dylib @loader_path/libggml.0.dylib "$lib" 2>/dev/null || true
+        install_name_tool -change /opt/homebrew/opt/ggml/lib/libggml-base.0.dylib @loader_path/libggml-base.0.dylib "$lib" 2>/dev/null || true
+        install_name_tool -change /opt/homebrew/opt/whisper-cpp/lib/libwhisper.1.dylib @loader_path/libwhisper.1.dylib "$lib" 2>/dev/null || true
+    done
 fi
 
 # Copy models

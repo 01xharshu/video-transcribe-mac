@@ -74,6 +74,7 @@ struct SidebarView: View {
         Button("Show in Finder") {
             NSWorkspace.shared.selectFile(job.inputURL.path, inFileViewerRootedAtPath: "")
         }
+        .disabled(job.isYouTube)
         
         Button("Remove", role: .destructive) {
             appState.removeJob(job)
@@ -85,55 +86,75 @@ struct JobRowView: View {
     let job: TranscriptionJob
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 8) {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 12) {
                 statusIcon
+                    .frame(width: 24, height: 24)
                 
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 3) {
                     Text(job.fileName)
-                        .font(.system(.body, weight: .medium))
+                        .font(.system(.body, design: .default, weight: .medium))
                         .lineLimit(1)
                         .truncationMode(.middle)
                     
-                    HStack(spacing: 4) {
-                        Text(job.fileExtension)
-                            .font(.system(.caption2, weight: .semibold))
-                            .padding(.horizontal, 5)
-                            .padding(.vertical, 1)
-                            .background(.quaternary)
-                            .clipShape(RoundedRectangle(cornerRadius: 3))
+                    HStack(spacing: 6) {
+                        if job.isYouTube {
+                            HStack(spacing: 3) {
+                                Image(systemName: "play.rectangle.fill")
+                                    .font(.system(size: 9))
+                                Text("YT")
+                                    .font(.system(.caption2, design: .rounded, weight: .bold))
+                            }
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.red.opacity(0.15))
+                            .foregroundStyle(.red)
+                            .clipShape(Capsule())
+                        } else {
+                            Text(job.fileExtension.uppercased())
+                                .font(.system(.caption2, design: .rounded, weight: .bold))
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Color.secondary.opacity(0.15))
+                                .foregroundStyle(.secondary)
+                                .clipShape(Capsule())
+                        }
                         
-                        Text(job.fileSizeFormatted)
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
+                        if !job.isYouTube {
+                            Text(job.fileSizeFormatted)
+                                .font(.system(.caption2, design: .monospaced))
+                                .foregroundStyle(.tertiary)
+                        }
                     }
                 }
             }
             
-            if job.status == .downloadingModel || job.status == .extractingAudio || job.status == .transcribing {
-                VStack(alignment: .leading, spacing: 2) {
+            if job.status == .downloadingVideo || job.status == .downloadingModel || job.status == .extractingAudio || job.status == .transcribing {
+                VStack(alignment: .leading, spacing: 4) {
                     ProgressView(value: job.progress)
                         .progressViewStyle(.linear)
-                        .tint(job.status == .extractingAudio ? .orange : (job.status == .downloadingModel ? .purple : .blue))
+                        .tint(job.status == .downloadingVideo ? .red : (job.status == .extractingAudio ? .orange : (job.status == .downloadingModel ? .purple : .blue)))
+                        .frame(height: 4)
                     
                     HStack {
                         Text(job.status.rawValue)
-                            .font(.caption2)
+                            .font(.system(.caption2, design: .rounded))
                             .foregroundStyle(.secondary)
                         
                         Spacer()
                         
                         if let eta = job.estimatedTimeRemaining {
                             Text("~\(TranscriptionJob.formatDuration(eta))")
-                                .font(.caption2)
+                                .font(.system(.caption2, design: .monospaced))
                                 .foregroundStyle(.secondary)
                         } else {
                             Text("\(Int(job.progress * 100))%")
-                                .font(.caption2)
+                                .font(.system(.caption2, design: .monospaced))
                                 .foregroundStyle(.secondary)
                         }
                     }
                 }
+                .padding(.top, 2)
             }
             
             if let warning = job.warning {
@@ -146,9 +167,11 @@ struct JobRowView: View {
                         .foregroundStyle(.orange)
                         .lineLimit(1)
                 }
+                .padding(.top, 2)
             }
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 6)
+        .padding(.horizontal, 2)
     }
     
     @ViewBuilder
@@ -158,6 +181,11 @@ struct JobRowView: View {
             Image(systemName: "clock")
                 .foregroundStyle(.secondary)
                 .font(.title3)
+        case .downloadingVideo:
+            Image(systemName: "arrow.down.circle")
+                .foregroundStyle(.red)
+                .font(.title3)
+                .symbolEffect(.variableColor.iterative)
         case .downloadingModel:
             Image(systemName: "arrow.down.circle")
                 .foregroundStyle(.purple)

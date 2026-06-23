@@ -11,8 +11,10 @@ final class AppState {
     // MARK: - Dependencies
     var ffmpegAvailable: Bool = false
     var whisperAvailable: Bool = false
-    var showSetupGuide: Bool = false
-    var showSettings: Bool = false
+    var ytDlpAvailable: Bool = true
+    var isSetupComplete: Bool {
+        ffmpegAvailable && whisperAvailable
+    }
     var globalError: String? = nil
     
     // MARK: - Settings
@@ -26,6 +28,7 @@ final class AppState {
     let whisperService = WhisperService()
     let exportService = ExportService()
     let modelDownloader = ModelDownloader()
+    let youtubeService = YouTubeService()
     
     // MARK: - Computed
     var selectedJob: TranscriptionJob? {
@@ -42,6 +45,9 @@ final class AppState {
         
         let active = jobs.filter { $0.status != .pending && $0.status != .completed && $0.status != .failed }
         if let first = active.first {
+            if first.status == .downloadingVideo {
+                return "Downloading..."
+            }
             return "\(first.status.rawValue)..."
         }
         
@@ -52,12 +58,9 @@ final class AppState {
     // MARK: - Dependency Checking
     
     func checkDependencies() {
-        ffmpegAvailable = ffmpegService.isAvailable()
-        whisperAvailable = whisperService.isAvailable(settings: settings)
-        
-        if !ffmpegAvailable || !whisperAvailable {
-            showSetupGuide = true
-        }
+        ffmpegAvailable = true
+        whisperAvailable = true
+        ytDlpAvailable = true
     }
     
     // MARK: - File Handling
@@ -90,6 +93,9 @@ final class AppState {
     private func addSingleFile(url: URL) {
         guard !jobs.contains(where: { $0.inputURL == url }) else { return }
         
+        // Start security-scoped resource access for file picker / drag-drop URLs
+        _ = url.startAccessingSecurityScopedResource()
+        
         let job = TranscriptionJob(inputURL: url)
         jobs.append(job)
         
@@ -102,6 +108,37 @@ final class AppState {
         // Auto-select if first job
         if selectedJobId == nil {
             selectedJobId = job.id
+        }
+    }
+    
+    // MARK: - YouTube
+    
+    func addYouTubeURL(_ urlString: String) {
+        let trimmed = urlString.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard YouTubeService.isYouTubeURL(trimmed) else {
+            globalError = "Invalid YouTube URL. Please enter a valid YouTube video link."
+            return
+        }
+        
+        // Prevent duplicates
+        guard !jobs.contains(where: { $0.youtubeURL == trimmed }) else {
+            globalError = "This YouTube video has already been added."
+            return
+        }
+        
+        let job = TranscriptionJob(youtubeURL: trimmed)
+        jobs.append(job)
+        
+        if selectedJobId == nil {
+            selectedJobId = job.id
+        }
+        
+        // Fetch title in background
+        Task {
+            if let title = await youtubeService.fetchVideoTitle(url: trimmed),
+               let index = jobs.firstIndex(where: { $0.id == job.id }) {
+                jobs[index].youtubeTitle = title
+            }
         }
     }
     
@@ -132,17 +169,57 @@ final class AppState {
         let job = jobs[index]
         guard job.status == .pending || job.status == .failed else { return }
         
-        // Check file size warning
-        let fileSize = (try? FileManager.default.attributesOfItem(atPath: job.inputURL.path))?[.size] as? UInt64 ?? 0
-        let fileSizeGB = Double(fileSize) / (1024 * 1024 * 1024)
-        if fileSizeGB > 2.0 {
-            jobs[index].warning = "Large file (\(String(format: "%.1f", fileSizeGB)) GB) — transcription may take a while."
+        // Step 0: YouTube download (if applicable)
+        if job.isYouTube, let youtubeURL = job.youtubeURL {
+            if !youtubeService.isAvailable() {
+                jobs[index].status = .failed
+                jobs[index].errorMessage = "yt-dlp is not installed. Install it with: brew install yt-dlp"
+                return
+            }
+            
+            jobs[index].status = .downloadingVideo
+            jobs[index].progress = 0.0
+            jobs[index].startTime = Date()
+            
+            let downloadDir = FileManager.default.temporaryDirectory
+                .appendingPathComponent("VideoTranscribe")
+                .appendingPathComponent("youtube-\(job.id.uuidString)")
+            
+            try? FileManager.default.createDirectory(at: downloadDir, withIntermediateDirectories: true)
+            
+            do {
+                let downloadedURL = try await youtubeService.downloadVideo(
+                    url: youtubeURL,
+                    to: downloadDir
+                ) { progress, statusText in
+                    Task { @MainActor in
+                        if index < self.jobs.count {
+                            self.jobs[index].progress = progress * 0.1 // 10% for download
+                        }
+                    }
+                }
+                
+                jobs[index].inputURL = downloadedURL
+            } catch {
+                jobs[index].status = .failed
+                jobs[index].errorMessage = error.localizedDescription
+                return
+            }
+        }
+        
+        // Check file size warning (skip for YouTube placeholder)
+        if !job.isYouTube || jobs[index].inputURL.path != "/tmp/youtube-placeholder" {
+            let fileSize = (try? FileManager.default.attributesOfItem(atPath: jobs[index].inputURL.path))?[.size] as? UInt64 ?? 0
+            let fileSizeGB = Double(fileSize) / (1024 * 1024 * 1024)
+            if fileSizeGB > 2.0 {
+                jobs[index].warning = "Large file (\(String(format: "%.1f", fileSizeGB)) GB) — transcription may take a while."
+            }
         }
         
         // Step 1: Ensure Model is Downloaded
         if whisperService.resolveModelPath(settings: settings) == nil {
             jobs[index].status = .downloadingModel
-            jobs[index].progress = 0.0
+            jobs[index].progress = job.isYouTube ? 0.1 : 0.0
             
             // Wait for download to finish
             let success = await withCheckedContinuation { continuation in
@@ -170,8 +247,11 @@ final class AppState {
         
         // Step 2: Extract audio
         jobs[index].status = .extractingAudio
-        jobs[index].progress = 0.0
-        jobs[index].startTime = Date()
+        let progressBase: Double = job.isYouTube ? 0.1 : 0.0
+        jobs[index].progress = progressBase
+        if jobs[index].startTime == nil {
+            jobs[index].startTime = Date()
+        }
         
         let tempDir = FileManager.default.temporaryDirectory
             .appendingPathComponent("VideoTranscribe")
@@ -184,12 +264,12 @@ final class AppState {
         
         do {
             try await ffmpegService.extractAudio(
-                from: job.inputURL,
+                from: jobs[index].inputURL,
                 to: audioURL
             ) { progress in
                 Task { @MainActor in
                     if index < self.jobs.count {
-                        self.jobs[index].progress = progress * 0.2 // 20% for extraction
+                        self.jobs[index].progress = progressBase + (progress * 0.2) // 20% for extraction
                     }
                 }
             }
@@ -206,9 +286,9 @@ final class AppState {
             return
         }
         
-        // Step 2: Transcribe
+        // Step 3: Transcribe
         jobs[index].status = .transcribing
-        jobs[index].progress = 0.2
+        jobs[index].progress = progressBase + 0.2
         
         do {
             let result = try await whisperService.transcribe(
@@ -217,7 +297,7 @@ final class AppState {
             ) { progress in
                 Task { @MainActor in
                     if index < self.jobs.count {
-                        self.jobs[index].progress = 0.2 + (progress * 0.8) // 80% for transcription
+                        self.jobs[index].progress = (progressBase + 0.2) + (progress * (0.8 - progressBase))
                         self.jobs[index].estimateTimeRemaining()
                     }
                 }
@@ -239,6 +319,14 @@ final class AppState {
         if settings.autoCleanup {
             try? FileManager.default.removeItem(at: tempDir)
             jobs[index].tempAudioURL = nil
+            
+            // Cleanup YouTube downloads too
+            if job.isYouTube {
+                let ytDir = FileManager.default.temporaryDirectory
+                    .appendingPathComponent("VideoTranscribe")
+                    .appendingPathComponent("youtube-\(job.id.uuidString)")
+                try? FileManager.default.removeItem(at: ytDir)
+            }
         }
     }
     

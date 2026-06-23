@@ -19,90 +19,7 @@ struct MainView: View {
                 DropZoneView()
             }
         }
-        .safeAreaInset(edge: .bottom) {
-            VStack(spacing: 0) {
-                if let error = appState.globalError ?? appState.selectedJob?.errorMessage {
-                    HStack(spacing: 8) {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .foregroundStyle(.red)
-                        Text(error)
-                            .font(.caption)
-                            .foregroundStyle(.primary)
-                            .lineLimit(1)
-                        
-                        Spacer()
-                        
-                        Button {
-                            if appState.globalError != nil {
-                                appState.globalError = nil
-                            } else if let id = appState.selectedJob?.id, let index = appState.jobs.firstIndex(where: { $0.id == id }) {
-                                appState.jobs[index].errorMessage = nil
-                            }
-                        } label: {
-                            Image(systemName: "xmark.circle.fill")
-                                .foregroundStyle(.secondary)
-                        }
-                        .buttonStyle(.plain)
-                    }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(.red.opacity(0.1))
-                    .overlay(Rectangle().frame(height: 1).foregroundStyle(.red.opacity(0.2)), alignment: .top)
-                }
-                
-                HStack(spacing: 16) {
-                    // System Status
-                    HStack(spacing: 8) {
-                        if appState.activeJobsCount > 0 {
-                            ProgressView()
-                                .controlSize(.small)
-                        } else {
-                            Circle()
-                                .fill(appState.ffmpegAvailable && appState.whisperAvailable ? Color.green : Color.red)
-                                .frame(width: 8, height: 8)
-                        }
-                        
-                        Text(appState.systemStatus)
-                            .font(.caption)
-                            .fontWeight(.medium)
-                    }
-                    
-                    Divider().frame(height: 14)
-                    
-                    // Dependencies
-                    HStack(spacing: 12) {
-                        StatusChip(name: "FFmpeg", icon: "waveform", isAvailable: appState.ffmpegAvailable)
-                        StatusChip(name: "Whisper", icon: "brain", isAvailable: appState.whisperAvailable)
-                    }
-                    
-                    Spacer()
-                    
-                    // Detailed Job Status
-                    if let activeJob = appState.jobs.first(where: { $0.status != .pending && $0.status != .completed && $0.status != .failed }) {
-                        HStack(spacing: 10) {
-                            Text(activeJob.fileName)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
-                                .frame(maxWidth: 150)
-                            
-                            ProgressView(value: activeJob.progress)
-                                .progressViewStyle(.linear)
-                                .frame(width: 100)
-                                .controlSize(.small)
-                            
-                            Text("\(Int(activeJob.progress * 100))%")
-                                .font(.system(.caption, design: .monospaced))
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(.ultraThinMaterial)
-                .overlay(Rectangle().frame(height: 1).foregroundStyle(Color.secondary.opacity(0.1)), alignment: .top)
-            }
-        }
+
         .animation(.spring(), value: appState.globalError)
         .animation(.spring(), value: appState.selectedJob?.errorMessage)
         .animation(.spring(), value: appState.activeJobsCount)
@@ -114,28 +31,48 @@ struct MainView: View {
                 toolbarContent
             }
         }
+        .overlay(alignment: .bottom) {
+            if let error = appState.globalError ?? appState.selectedJob?.errorMessage {
+                HStack(spacing: 12) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.red)
+                    Text(error)
+                        .font(.system(.subheadline, weight: .medium))
+                        .foregroundStyle(.primary)
+                        .lineLimit(2)
+                    
+                    Spacer()
+                    
+                    Button {
+                        withAnimation(.spring()) {
+                            if appState.globalError != nil {
+                                appState.globalError = nil
+                            } else if let id = appState.selectedJob?.id, let index = appState.jobs.firstIndex(where: { $0.id == id }) {
+                                appState.jobs[index].errorMessage = nil
+                            }
+                        }
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .background(.ultraThinMaterial)
+                .background(Color.red.opacity(0.1))
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .shadow(color: .black.opacity(0.1), radius: 10, y: 5)
+                .padding(20)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
         .fileImporter(
             isPresented: $state.showFilePicker,
             allowedContentTypes: supportedTypes,
             allowsMultipleSelection: true
         ) { result in
             handleFileImport(result)
-        }
-        .sheet(isPresented: $state.showSetupGuide) {
-            SetupGuideView()
-        }
-        .sheet(isPresented: $state.showSettings) {
-            VStack {
-                HStack {
-                    Spacer()
-                    Button("Done") {
-                        appState.showSettings = false
-                    }
-                    .padding([.top, .trailing])
-                }
-                SettingsView()
-            }
-            .frame(width: 500, height: 450)
         }
         .onDrop(of: supportedTypes, isTargeted: nil) { providers in
             handleDrop(providers)
@@ -145,38 +82,71 @@ struct MainView: View {
     
     @ViewBuilder
     private var toolbarContent: some View {
-        Button {
-            appState.showFilePicker = true
-        } label: {
-            Label("Open", systemImage: "plus")
-        }
-        .help("Add video files (⌘O)")
-        
-        if appState.jobs.contains(where: { $0.status == .pending }) {
+        HStack(spacing: 16) {
+            // Detailed Job Status
+            if let activeJob = appState.jobs.first(where: { $0.status != .pending && $0.status != .completed && $0.status != .failed }) {
+                HStack(spacing: 8) {
+                    Text(activeJob.fileName)
+                        .font(.system(.caption, design: .default))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .frame(maxWidth: 120)
+                    
+                    ProgressView(value: activeJob.progress)
+                        .progressViewStyle(.linear)
+                        .frame(width: 60)
+                        .controlSize(.mini)
+                    
+                    Text("\(Int(activeJob.progress * 100))%")
+                        .font(.system(.caption2, design: .monospaced, weight: .bold))
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.trailing, 10)
+            } else {
+                // Dependency Status (Only show if missing)
+                if !appState.ffmpegAvailable || !appState.whisperAvailable {
+                    HStack(spacing: 8) {
+                        if !appState.ffmpegAvailable {
+                            StatusChip(name: "FFmpeg Missing", icon: "exclamationmark.triangle.fill", isAvailable: false)
+                        }
+                        if !appState.whisperAvailable {
+                            StatusChip(name: "Whisper Missing", icon: "exclamationmark.triangle.fill", isAvailable: false)
+                        }
+                    }
+                    .padding(.trailing, 10)
+                }
+            }
+            
+            if appState.jobs.contains(where: { $0.status == .pending }) {
+                Button {
+                    appState.startAllPending()
+                } label: {
+                    Label("Transcribe All", systemImage: "play.fill")
+                }
+                .help("Start all pending transcriptions")
+            }
+            
             Button {
-                appState.startAllPending()
+                appState.showFilePicker = true
             } label: {
-                Label("Transcribe All", systemImage: "play.fill")
+                Label("Open", systemImage: "plus")
             }
-            .help("Start all pending transcriptions")
-        }
-        
-        if appState.activeJobsCount > 0 {
-            HStack(spacing: 6) {
-                ProgressView()
-                    .controlSize(.small)
-                Text("\(appState.activeJobsCount) active")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+            .help("Add video files (⌘O)")
+            
+            if #available(macOS 14.0, *) {
+                SettingsLink {
+                    Label("Settings", systemImage: "gearshape")
+                }
+                .help("Open Settings (⌘,)")
+            } else {
+                Button {
+                    NSApp.sendAction(Selector("showSettingsWindow:"), to: nil, from: nil)
+                } label: {
+                    Label("Settings", systemImage: "gearshape")
+                }
+                .help("Open Settings (⌘,)")
             }
         }
-        
-        Button {
-            appState.showSettings = true
-        } label: {
-            Label("Settings", systemImage: "gearshape")
-        }
-        .help("Open Settings (⌘,)")
     }
     
     private var supportedTypes: [UTType] {

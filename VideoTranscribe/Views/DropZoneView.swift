@@ -5,151 +5,156 @@ struct DropZoneView: View {
     @Environment(AppState.self) private var appState
     @State private var isTargeted = false
     @State private var animateGradient = false
+    @State private var youtubeURL = ""
+    @State private var isValidatingURL = false
     
     var body: some View {
-        VStack(spacing: 0) {
-            Spacer()
+        ZStack {
+            backdropView
             
-            VStack(spacing: 24) {
-                // Animated icon
-                ZStack {
-                    // Glow ring
-                    Circle()
-                        .stroke(
-                            AngularGradient(
-                                colors: [.blue, .purple, .pink, .orange, .blue],
-                                center: .center
-                            ),
-                            lineWidth: 2
-                        )
-                        .frame(width: 120, height: 120)
-                        .opacity(isTargeted ? 0.8 : 0.2)
-                        .rotationEffect(.degrees(animateGradient ? 360 : 0))
-                        .animation(.linear(duration: 4).repeatForever(autoreverses: false), value: animateGradient)
-                    
-                    // Icon background
-                    Circle()
-                        .fill(.ultraThinMaterial)
-                        .frame(width: 100, height: 100)
-                    
-                    Image(systemName: isTargeted ? "arrow.down.circle.fill" : "film")
-                        .font(.system(size: 40, weight: .light))
-                        .foregroundStyle(
-                            isTargeted
-                                ? AnyShapeStyle(.blue)
-                                : AnyShapeStyle(.secondary)
-                        )
-                        .contentTransition(.symbolEffect(.replace))
-                }
-                .scaleEffect(isTargeted ? 1.1 : 1.0)
-                .animation(.spring(duration: 0.3), value: isTargeted)
+            VStack {
+                Spacer()
                 
-                VStack(spacing: 8) {
-                    Text("Drop Video Files Here")
-                        .font(.system(.title2, weight: .semibold))
-                    
-                    Text("Supports MP4, MOV, MKV, WebM, AVI, and more")
-                        .font(.subheadline)
+                ContentUnavailableView {
+                    Label("No Video Selected", systemImage: "film")
+                        .font(.system(.largeTitle, design: .rounded, weight: .semibold))
+                        .foregroundStyle(isTargeted ? Color.accentColor : Color.primary)
+                        .symbolEffect(.pulse, options: .repeating, isActive: isTargeted)
+                } description: {
+                    Text("Drag and drop media files, or paste a YouTube link to begin.")
+                        .font(.system(.body, design: .default))
                         .foregroundStyle(.secondary)
-                    
-                    Text("or")
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
-                        .padding(.top, 4)
+                } actions: {
+                    actionsView
                 }
                 
-                HStack(spacing: 12) {
-                    Button {
-                        appState.showFilePicker = true
-                    } label: {
-                        Label("Choose Files", systemImage: "folder")
-                            .frame(minWidth: 130)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
-                    
-                    Button {
-                        selectFolder()
-                    } label: {
-                        Label("Choose Folder", systemImage: "folder.badge.plus")
-                            .frame(minWidth: 130)
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.large)
-                }
+                Spacer()
                 
-                // Status indicators
-                HStack(spacing: 20) {
-                    StatusIndicator(
-                        icon: "lock.shield.fill",
-                        text: "100% Local",
-                        color: .green
-                    )
-                    
-                    StatusIndicator(
-                        icon: "bolt.fill",
-                        text: "Metal Accelerated",
-                        color: .orange
-                    )
-                    
-                    StatusIndicator(
-                        icon: "eye.slash.fill",
-                        text: "Private",
-                        color: .blue
-                    )
-                }
-                .padding(.top, 8)
-                
-                // Dependency warnings
-                if !appState.ffmpegAvailable || !appState.whisperAvailable {
-                    VStack(spacing: 8) {
-                        Divider()
-                            .padding(.horizontal, 40)
-                        
-                        if !appState.ffmpegAvailable {
-                            DependencyWarning(
-                                name: "FFmpeg",
-                                installCommand: "brew install ffmpeg"
-                            )
-                        }
-                        
-                        if !appState.whisperAvailable {
-                            DependencyWarning(
-                                name: "whisper.cpp",
-                                installCommand: "brew install whisper-cpp"
-                            )
-                        }
-                        
-                        Button("Setup Guide") {
-                            appState.showSetupGuide = true
-                        }
-                        .buttonStyle(.link)
-                        .font(.caption)
-                    }
-                    .padding(.top, 4)
-                }
+                statusIndicators
             }
-            .padding(40)
-            
-            Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background {
-            RoundedRectangle(cornerRadius: 16)
-                .strokeBorder(
-                    isTargeted ? Color.accentColor : Color.secondary.opacity(0.2),
-                    style: StrokeStyle(lineWidth: 2, dash: isTargeted ? [] : [8, 4])
-                )
-                .padding(20)
+            dropZoneBorder
         }
         .background(.background)
         .onDrop(of: [.fileURL], isTargeted: $isTargeted) { providers in
             handleDrop(providers)
             return true
         }
-        .onAppear {
-            animateGradient = true
+    }
+    
+    @ViewBuilder
+    private var actionsView: some View {
+        VStack(spacing: 20) {
+            HStack(spacing: 16) {
+                Button("Choose Files…") {
+                    appState.showFilePicker = true
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                
+                Button("Choose Folder…") {
+                    selectFolder()
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.large)
+            }
+            .padding(.top, 10)
+            
+            youtubeInputView
         }
+    }
+    
+    @ViewBuilder
+    private var youtubeInputView: some View {
+        VStack(spacing: 12) {
+            Divider()
+                .frame(maxWidth: 300)
+                .padding(.vertical, 10)
+            
+            Text("Or download from YouTube")
+                .font(.system(.caption, weight: .medium))
+                .foregroundStyle(.secondary)
+            
+            HStack(spacing: 8) {
+                TextField("Paste YouTube URL here", text: $youtubeURL)
+                    .textFieldStyle(.plain)
+                    .font(.system(.body, design: .monospaced))
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(.quaternary)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .strokeBorder(Color.secondary.opacity(0.2), lineWidth: 1)
+                    )
+                    .onSubmit {
+                        submitYouTubeURL()
+                    }
+                
+                Button {
+                    if let clipboard = NSPasteboard.general.string(forType: .string) {
+                        youtubeURL = clipboard
+                    }
+                } label: {
+                    Image(systemName: "doc.on.clipboard")
+                }
+                .buttonStyle(.bordered)
+                .help("Paste from clipboard")
+                
+                Button("Add") {
+                    submitYouTubeURL()
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.red)
+                .disabled(youtubeURL.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            }
+            .frame(maxWidth: 400)
+        }
+        .padding(.top, 10)
+    }
+    
+    @ViewBuilder
+    private var backdropView: some View {
+        if !isTargeted {
+            LinearGradient(
+                colors: [Color.blue.opacity(0.05), Color.purple.opacity(0.05), Color.clear],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+        }
+    }
+    
+    @ViewBuilder
+    private var statusIndicators: some View {
+        HStack(spacing: 24) {
+            StatusIndicator(icon: "lock.shield.fill", text: "100% Local", color: .green)
+            StatusIndicator(icon: "bolt.fill", text: "Metal Accelerated", color: .orange)
+            StatusIndicator(icon: "eye.slash.fill", text: "Private", color: .blue)
+        }
+        .padding(.bottom, 30)
+    }
+    
+    @ViewBuilder
+    private var dropZoneBorder: some View {
+        RoundedRectangle(cornerRadius: 16)
+            .strokeBorder(
+                isTargeted ? Color.accentColor : Color.clear,
+                style: StrokeStyle(lineWidth: 3, dash: isTargeted ? [10, 5] : [])
+            )
+            .background(isTargeted ? Color.accentColor.opacity(0.05) : Color.clear)
+            .animation(.easeInOut(duration: 0.2), value: isTargeted)
+            .padding(16)
+    }
+    
+    private func submitYouTubeURL() {
+        let trimmed = youtubeURL.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        
+        appState.addYouTubeURL(trimmed)
+        youtubeURL = ""
     }
     
     private func selectFolder() {

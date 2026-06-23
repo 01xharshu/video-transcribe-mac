@@ -1,0 +1,22 @@
+# Xcode / Swift Package Manager
+.build/
+.swiftpm/
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+xcuserdata/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+
+# App bundle built by script
+Video Transcribe.app/
+
+# Generated files / test files
+AppIcon.icns
+test.wav
+
+# Downloaded models or temporary dependencies
+whisper-models/
