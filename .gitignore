@@ -28,3 +28,5 @@ whisper-models/
 fix_icon.py
 clean_icon.png
 MyIcon.iconset/
+build_app.sh
+build_app.sh

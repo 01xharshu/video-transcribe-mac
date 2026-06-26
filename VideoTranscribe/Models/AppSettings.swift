@@ -52,15 +52,51 @@ struct AppSettings: Codable {
         NSHomeDirectory() + "/whisper.cpp/models",
         "/usr/local/share/whisper/models",
         "/opt/homebrew/share/whisper/models",
+        "/opt/homebrew/share/whisper-cpp/models",
     ]
     
     func resolvedWhisperPath() -> String? {
-        // Only use the bundled Whisper CLI
+        // 1. Try bundled Whisper CLI first
         if let bundlePath = Bundle.main.path(forResource: "whisper-cli", ofType: nil, inDirectory: "bin") {
             if FileManager.default.isExecutableFile(atPath: bundlePath) {
-                return bundlePath
+                // Verify the bundled binary is a real build (not a stub) by checking file size
+                // A functional whisper-cli is typically > 1 MB
+                if let attrs = try? FileManager.default.attributesOfItem(atPath: bundlePath),
+                   let size = attrs[.size] as? UInt64, size > 1_000_000 {
+                    return bundlePath
+                }
             }
         }
+        
+        // 2. Fall back to system-installed whisper-cli (e.g. Homebrew)
+        for path in Self.commonWhisperPaths {
+            if FileManager.default.isExecutableFile(atPath: path) {
+                return path
+            }
+        }
+        
+        // 3. Try to find via PATH
+        let whichProcess = Process()
+        let pipe = Pipe()
+        whichProcess.executableURL = URL(fileURLWithPath: "/usr/bin/which")
+        whichProcess.arguments = ["whisper-cli"]
+        var env = ProcessInfo.processInfo.environment
+        env["PATH"] = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:" + (env["PATH"] ?? "")
+        whichProcess.environment = env
+        whichProcess.standardOutput = pipe
+        whichProcess.standardError = FileHandle.nullDevice
+        
+        do {
+            try whichProcess.run()
+            whichProcess.waitUntilExit()
+            if whichProcess.terminationStatus == 0 {
+                let data = pipe.fileHandleForReading.readDataToEndOfFile()
+                let foundPath = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+                if !foundPath.isEmpty && FileManager.default.isExecutableFile(atPath: foundPath) {
+                    return foundPath
+                }
+            }
+        } catch {}
         
         return nil
     }

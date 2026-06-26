@@ -9,10 +9,26 @@ final class FFmpegService {
     }
     
     func findFFmpegPath() -> String? {
-        // Only use the bundled FFmpeg
+        // 1. Try bundled FFmpeg first (must be a real binary, not a stub)
         if let bundlePath = Bundle.main.path(forResource: "ffmpeg", ofType: nil, inDirectory: "bin") {
             if FileManager.default.isExecutableFile(atPath: bundlePath) {
-                return bundlePath
+                // A real static ffmpeg is typically > 10 MB
+                if let attrs = try? FileManager.default.attributesOfItem(atPath: bundlePath),
+                   let size = attrs[.size] as? UInt64, size > 10_000_000 {
+                    return bundlePath
+                }
+            }
+        }
+        
+        // 2. Fall back to system-installed FFmpeg
+        let commonPaths = [
+            "/opt/homebrew/bin/ffmpeg",
+            "/usr/local/bin/ffmpeg",
+            "/usr/bin/ffmpeg"
+        ]
+        for path in commonPaths {
+            if FileManager.default.isExecutableFile(atPath: path) {
+                return path
             }
         }
         

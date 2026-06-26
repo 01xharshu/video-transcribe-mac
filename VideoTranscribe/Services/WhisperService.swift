@@ -353,12 +353,25 @@ enum WhisperError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .notFound:
-            return "whisper.cpp not found. Please install it and configure the path in Settings."
+            return "whisper.cpp not found. Please install it with: brew install whisper-cpp"
         case .modelNotFound(let model):
-            return "Model '\(model.displayName)' (\(model.modelFileName)) not found. Download it from the whisper.cpp models repository."
+            return "Model '\(model.displayName)' (\(model.modelFileName)) not found. Try switching to a smaller model in Settings, or download it manually."
         case .transcriptionFailed(let code, let stderr):
-            let truncatedErr = stderr.suffix(500)
-            return "Transcription failed (exit code \(code)).\n\(truncatedErr)"
+            // Provide actionable messages for known exit codes
+            switch code {
+            case 9:
+                return "Model failed to load (exit code 9). The selected model may be missing or corrupted. Try switching to 'Tiny' or 'Base' model in Settings."
+            case 137:
+                return "Transcription was killed (exit code 137). This usually means the model is too large for available memory. Try a smaller model."
+            case 139:
+                return "Transcription crashed (exit code 139 — segfault). The whisper binary may be incompatible. Try reinstalling: brew reinstall whisper-cpp"
+            default:
+                let truncatedErr = String(stderr.suffix(500))
+                if truncatedErr.isEmpty {
+                    return "Transcription failed (exit code \(code)). Try switching to a different model in Settings."
+                }
+                return "Transcription failed (exit code \(code)).\n\(truncatedErr)"
+            }
         case .launchFailed(let error):
             return "Failed to launch whisper.cpp: \(error.localizedDescription)"
         case .parseError:

@@ -60,7 +60,8 @@ struct MainView: View {
     private var toolbarContent: some View {
         HStack(spacing: 16) {
             // Detailed Job Status
-            if let activeJob = appState.jobs.first(where: { $0.status != .pending && $0.status != .completed && $0.status != .failed }) {
+            let activeJobs = appState.jobs.filter { $0.status != .pending && $0.status != .completed && $0.status != .failed }
+            if let activeJob = activeJobs.first {
                 HStack(spacing: 8) {
                     Text(activeJob.fileName)
                         .font(.system(.caption, design: .default))
@@ -76,6 +77,18 @@ struct MainView: View {
                     Text("\(Int(activeJob.progress * 100))%")
                         .font(.system(.caption2, design: .monospaced, weight: .bold))
                         .foregroundStyle(.secondary)
+                    
+                    // Show queue count if more pending
+                    let pendingCount = appState.jobs.filter({ $0.status == .pending }).count
+                    if pendingCount > 0 {
+                        Text("+\(pendingCount) queued")
+                            .font(.system(.caption2, weight: .medium))
+                            .foregroundStyle(.orange)
+                            .padding(.horizontal, 5)
+                            .padding(.vertical, 2)
+                            .background(.orange.opacity(0.1))
+                            .clipShape(Capsule())
+                    }
                 }
                 .padding(.trailing, 10)
             } else {

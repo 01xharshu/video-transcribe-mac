@@ -7,6 +7,8 @@ final class AppState {
     var jobs: [TranscriptionJob] = []
     var selectedJobId: UUID? = nil
     var showFilePicker: Bool = false
+    var isProcessingQueue: Bool = false
+    var showYouTubeInput: Bool = false
     
     // MARK: - Dependencies
     var ffmpegAvailable: Bool = false
@@ -142,6 +144,39 @@ final class AppState {
         }
     }
     
+    /// Parse and add multiple YouTube URLs from a pasted block of text (newline/space/comma separated)
+    func addYouTubeURLs(_ text: String) -> Int {
+        let separators = CharacterSet.whitespacesAndNewlines.union(CharacterSet(charactersIn: ","))
+        let candidates = text.components(separatedBy: separators)
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+        
+        var addedCount = 0
+        for candidate in candidates {
+            if YouTubeService.isYouTubeURL(candidate) {
+                let alreadyExists = jobs.contains(where: { $0.youtubeURL == candidate })
+                if !alreadyExists {
+                    let job = TranscriptionJob(youtubeURL: candidate)
+                    jobs.append(job)
+                    addedCount += 1
+                    
+                    if selectedJobId == nil {
+                        selectedJobId = job.id
+                    }
+                    
+                    // Fetch title in background
+                    Task {
+                        if let title = await youtubeService.fetchVideoTitle(url: candidate),
+                           let index = jobs.firstIndex(where: { $0.id == job.id }) {
+                            jobs[index].youtubeTitle = title
+                        }
+                    }
+                }
+            }
+        }
+        return addedCount
+    }
+    
     // MARK: - Transcription
     
     func startTranscription(for job: TranscriptionJob) {
@@ -153,13 +188,28 @@ final class AppState {
     }
     
     func startAllPending() {
-        for (index, job) in jobs.enumerated() {
-            if job.status == .pending || job.status == .failed {
-                Task {
-                    await processJob(at: index)
-                }
-            }
+        guard !isProcessingQueue else { return }
+        
+        Task {
+            await processQueue()
         }
+    }
+    
+    @MainActor
+    private func processQueue() async {
+        guard !isProcessingQueue else { return }
+        isProcessingQueue = true
+        
+        // Process jobs one by one — new jobs added during processing will be picked up
+        while true {
+            // Find the next pending/failed job
+            guard let index = jobs.firstIndex(where: { $0.status == .pending || $0.status == .failed }) else {
+                break
+            }
+            await processJob(at: index)
+        }
+        
+        isProcessingQueue = false
     }
     
     @MainActor

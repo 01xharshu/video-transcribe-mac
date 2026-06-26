@@ -33,6 +33,17 @@ final class TranscriptionJob: Identifiable, Equatable {
         if let title = youtubeTitle, !title.isEmpty {
             return title
         }
+        if isYouTube {
+            // Show a friendly name while title is loading
+            if let url = youtubeURL {
+                // Extract video ID for a compact display
+                if let idRange = url.range(of: "v=") {
+                    let videoId = String(url[idRange.upperBound...].prefix(11))
+                    return "YouTube — \(videoId)"
+                }
+            }
+            return "YouTube Video"
+        }
         return inputURL.deletingPathExtension().lastPathComponent
     }
     
